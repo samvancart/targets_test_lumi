@@ -1,6 +1,3 @@
-source("renv/activate.R")
-
-
 # SET ENV VARS ------------------------------------------------------------
 
 
@@ -41,4 +38,22 @@ if(hpc) {
     RENV_PATHS_LIBRARY = Sys.getenv("MP_REM_USER_PROJECTS_DIR")
   )
 }
+
+
+# ACTIVATE RENV -----------------------------------------------------------
+
+
+source("renv/activate.R")
+
+
+
+
+
+
+
+
+
+
+
+
 
