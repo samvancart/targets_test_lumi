@@ -1,0 +1,25 @@
+# RStudio and R artifacts
+.Rhistory
+.RData
+.Rproj.user/
+.Renviron
+
+# renv environment folders
+renv/library/
+renv/python/
+renv/staging/
+renv/
+
+# targets metadata
+_targets/
+
+# Optional: ignore raw or sensitive data
+data/
+batch_jobs/
+logs/
+nohup_logs/
+code.txt
+
+# OS-specific cruft
+.DS_Store
+Thumbs.db
