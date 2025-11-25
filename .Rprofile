@@ -35,10 +35,11 @@ hpc <- ifelse(slurm_host=="", F, T) # If no host detected then local
 
 if(hpc) {
   Sys.setenv(
-    RENV_PATHS_LIBRARY = mp_rem_project_dir
+    RENV_PATHS_LIBRARY = file.path(mp_rem_project_dir, "renv")
   )
 }
 
+renv_paths_library <- Sys.getenv("RENV_PATHS_LIBRARY")
 
 # ACTIVATE RENV -----------------------------------------------------------
 
