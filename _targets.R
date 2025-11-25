@@ -20,7 +20,7 @@ print(hpc_account)
 script_lines_container <- c(
 paste0("#SBATCH --account=", hpc_account),
 paste0("cd ",  mp_rem_project_dir),
-paste0("CONTAINER=", mp_rem_container),
+paste0("CONTAINER=", mp_rem_container_path),
   "export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK",
   paste0("singularity exec \\
   --bind ", mp_rem_project_dir, ":", mp_rem_project_dir, " \\
