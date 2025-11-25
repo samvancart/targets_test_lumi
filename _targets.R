@@ -24,10 +24,8 @@ paste0("CONTAINER=", mp_rem_container_path),
   "export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK",
   paste0("singularity exec \\
   --bind ", mp_rem_project_dir, ":", mp_rem_project_dir, " \\
-  --bind ", renv_paths_library,":", renv_paths_library, " \\
   --bind $HOME/bin:/home/$USER/bin \\
   --env PATH=$PATH \\
-  --env RENV_PATHS_LIBRARY=", renv_paths_library," \\
   $CONTAINER \\")
     )
 
