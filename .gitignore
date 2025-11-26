@@ -18,6 +18,7 @@ data/
 batch_jobs/
 logs/
 nohup_logs/
+config/
 code.txt
 
 # OS-specific cruft
