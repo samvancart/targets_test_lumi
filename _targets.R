@@ -99,10 +99,10 @@ tar_source()
 
 # Replace the target list below with your own:
 list(
-    tar_target(
-        name = values,
-        command = c(100000, 100000)
-        ),
+  tar_target(
+      name = values,
+      command = c(100000, 100000)
+      ),
   tar_target(
     name = data,
     command =   print(data.table(x = rnorm(values), y = rnorm(values))),
