@@ -5,12 +5,19 @@ library(targets)
 library(tarchetypes)
 library(crew)
 library(crew.cluster)
+library(parallelly)
 
 
 # SET ACCOUNT -------------------------------------------------------------
 
 
 print(hpc_account)
+
+
+# CORES -------------------------------------------------------------------
+
+
+cores <- max(1, availableCores() - 1)
 
 
 # SCRIPT LINES ------------------------------------------------------------
@@ -61,7 +68,7 @@ controller_hpc_small <- crew.cluster::crew_controller_slurm(
 
 controller_local <- crew::crew_controller_local(
   name = "local",
-  workers = 1,
+  workers = cores,
   options_local = crew::crew_options_local(log_directory = "logs"),
   # Uncomment to add logging via the autometric package
   # options_metrics = crew::crew_options_metrics(
@@ -75,7 +82,7 @@ controller_local <- crew::crew_controller_local(
 
 
 tar_option_set(
-  packages = c("data.table"), # Packages that your targets need for their tasks.
+  packages = c("data.table", "future", "future.apply"), # Packages that your targets need for their tasks.
   controller = crew::crew_controller_group(
     controller_local,
     controller_hpc_small
@@ -99,20 +106,47 @@ tar_source()
 
 # Replace the target list below with your own:
 list(
-  tar_target(
-      name = values,
-      command = c(100000, 100000)
-      ),
-  tar_target(
-    name = data,
-    command =   print(data.table(x = rnorm(values), y = rnorm(values))),
-    pattern = map(values),
-    iteration = "list"
-    # format = "qs" # Efficient storage for general data objects.
-  ),
-  resources = tar_resources(
-    # if on HPC use "hpc_small" controller by default, otherwise use "local"
-   crew = tar_resources_crew(controller = ifelse(hpc, "hpc_small", "local"))
+  tar_plan(
+    tar_target(
+      params_path,
+      "data/input/params.rds",
+      format = "file"
+    ),
+    params = readRDS(params_path),
+    n = params$n,
+    workers = params$workers,
+    tar_group_by(
+      values_dt,
+      {
+        dt <- params$dt
+      },
+      id
+    ),
+    tar_target(
+      name = data,
+      {
+        val <- values_dt$val
+        id <- values_dt$id
+        
+        # Measure execution time
+        timing <- system.time({
+          res <- test_parallel_future(n = n, val = val, workers = workers)
+        })
+        
+        # Return both time and result
+        list(
+          time = timing,
+          result = res,
+          id = id
+        )
+      },
+      pattern = map(values_dt),
+      iteration = "list",
+      resources = tar_resources(
+        # if on HPC use "hpc_small" controller by default, otherwise use "local"
+        crew = tar_resources_crew(controller = ifelse(hpc, "hpc_small", "local"))
+      )
+    )
   )
 )
 
