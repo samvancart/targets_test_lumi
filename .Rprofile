@@ -19,6 +19,7 @@ mp_rem_crew_logs_dir <- file.path(mp_rem_project_dir, "logs")
 hpc_account <- Sys.getenv("MP_REM_PROJECT")
 mp_git_repo_ssh <- Sys.getenv("MP_GIT_REPO_SSH")
 
+
 # DETERMINE HOST ----------------------------------------------------------
 
 

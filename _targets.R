@@ -142,10 +142,6 @@ list(
       },
       pattern = map(values_dt),
       iteration = "list",
-      resources = tar_resources(
-        # if on HPC use "hpc_small" controller by default, otherwise use "local"
-        crew = tar_resources_crew(controller = ifelse(hpc, "hpc_small", "local"))
-      )
     )
   )
 )
