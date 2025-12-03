@@ -52,7 +52,7 @@ controller_hpc_small <- crew.cluster::crew_controller_slurm(
   seconds_idle = 20, # time until workers are shut down after idle
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE, #prints job ID when submitted
-    command_submit = paste0(Sys.getenv("HOME"), "/bin/sbatch-wrapper"),
+    command_submit = cmd_submit,
     # command_terminate = "scancel-wrapper", # Deprecated
         script_lines = script_lines_container,
     log_output = file.path(mp_rem_crew_logs_dir, "crew_small_log_%A.out"),
@@ -82,7 +82,7 @@ controller_local <- crew::crew_controller_local(
 
 
 tar_option_set(
-  packages = c("data.table", "future", "future.apply"), # Packages that your targets need for their tasks.
+  packages = c("data.table", "future", "future.apply", "quarto", "rprojroot"), # Packages that your targets need for their tasks.
   controller = crew::crew_controller_group(
     controller_local,
     controller_hpc_small
@@ -142,7 +142,8 @@ list(
       },
       pattern = map(values_dt),
       iteration = "list",
-    )
+    ),
+      tar_quarto(report_1, "data/reports/report-1.qmd")
   )
 )
 

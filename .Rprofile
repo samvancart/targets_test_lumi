@@ -23,14 +23,44 @@ mp_git_repo_ssh <- Sys.getenv("MP_GIT_REPO_SSH")
 # DETERMINE HOST ----------------------------------------------------------
 
 
-slurm_host <- Sys.getenv("HOSTNAME")
-# print(paste0("HOST: ", slurm_host))
+# Detect environment
+host <- Sys.getenv("HOSTNAME", unset = "")
 
+# 1. Detect Docker (local container)
+in_docker <- file.exists("/.dockerenv") ||
+  (file.exists("/proc/1/cgroup") &&
+     any(grepl("docker", readLines("/proc/1/cgroup"))))
 
-# SET HPC -----------------------------------------------------------------
+# 2. Detect local bare metal (hostname == "")
+is_local <- (host == "" && !in_docker)
 
+# 3. Detect CSC (Puhti or Lumi)
+is_puhti <- grepl("^puhti-", host)
+is_lumi  <- grepl("^uan[0-9]+", host)
+is_csc   <- is_puhti || is_lumi
 
-hpc <- ifelse(slurm_host=="", F, T) # If no host detected then local
+# Flag for HPC
+hpc <- is_csc
+
+# 4. Print where it is loaded
+if (in_docker) {
+  message("Loaded in local Docker container (hostname: ", host, ")")
+} else if (is_local) {
+  message("Loaded locally (no Docker)")
+} else if (is_puhti) {
+  message("Loaded on CSC Puhti (hostname: ", host, ")")
+} else if (is_lumi) {
+  message("Loaded on CSC Lumi (hostname: ", host, ")")
+} else {
+  message("Loaded in unknown environment (hostname: ", host, ")")
+}
+
+# Optional: set HPC-specific options
+if (hpc) {
+  options(hpc = TRUE)
+} else {
+  options(hpc = FALSE)
+}
 
 
 # SET RENV PATHS LIB ------------------------------------------------------
@@ -63,13 +93,21 @@ config <- list(
 
 if (!dir.exists("config")) dir.create("config", recursive = TRUE)
 
-yaml::write_yaml(config, file.path("config", "rem_config.yml"))
+# yaml::write_yaml(config, file.path("config", "rem_config.yml")) # Yaml needs to be configured in container
 
 # --- Write ENV (for bash) ---
 env_lines <- paste(names(config), unlist(config), sep="=")
 writeLines(env_lines, con = file.path("config", "rem_config.env"))
 
 
+# SBATCH WRAPPER ----------------------------------------------------------
+
+sbatch_wrapper_file <- paste0(Sys.getenv("HOME"), "/bin/sbatch-wrapper")
+  cmd_submit <- if(file.exists(sbatch_wrapper_file)) {
+    sbatch_wrapper_file
+  } else {
+    "sbatch"
+  }
 
 
 
